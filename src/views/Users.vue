@@ -1,56 +1,34 @@
 <template>
-  <h2>Espere por favor</h2>
-  <h2>Users</h2>
-  <h5>Error en la carga...</h5>
-
-  <div>
+  <h2 v-if="isLoading">Espere por favor</h2>
+  <h2 v-else>Users</h2>
+  <h5 v-if="!users.length && errorMessage">{{ errorMessage }}</h5>
+  <div v-if="users.length">
     <ul>
-      <li>
+      <li v-for="(user, index) in users" :key="index">
         <h4>
-          Nombre del usuario
+          Nombre del usuario: {{ user.first_name }}
         </h4>
-        <h6>Email</h6>
+        <h5>Email: {{ user.email }}</h5>
       </li>
     </ul>
   </div>
 
-  <button>Atras</button>
-  <button>Siguiente</button>
-  <span>Pagina: 3</span>
+  <button @click="prevPage">Atras</button>
+  <button @click="nextPage">Siguiente</button>
+  <span>Pagina: {{ currentPage }}</span>
 </template>
 
 <script>
-import axios from 'axios'
-import { ref } from 'vue';
+import useUsers from '../composables/useUsers'
 
 export default {
   setup() {
-    const users = ref([]);
-    const isLoading = ref(true);
-    const currentPage = ref(1)
-    const errorMessage = ref(1)
 
-    const getUsers = async (page = 1) => {
+    return {
 
-      if (page <= 0) page = 1
-
-      isLoading.value = true;
-
-      const { data } = await axios.get(`https://reqres.in/api/users?page=${page}`);
-
-      console.log('data', data);
-
-      if (data.length) {
-        users.value = data.users;
-        currentPage.value = page;
-      } else if (currentPage.value > 0) {
-        errorMessage.value = "No hay mas usuarios"
-      }
-
+      ...useUsers()
 
     }
-
-    getUsers()
 
   }
 }
